@@ -31,9 +31,15 @@ async function run() {
     const toysCollections=client.db('intelliKids').collection('allToys')
 
 
+    app.get('/toys', async(req,res)=>{
+      const result=await toysCollections.find().toArray()
+      res.send(result)
+    })
+
     app.post('/toys',async(req,res)=>{
       const toysInfo=req.body 
-      console.log(toysInfo)
+      const result=await toysCollections.insertOne(toysInfo)
+      res.send(result)
     })
 
 
