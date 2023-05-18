@@ -28,8 +28,13 @@ async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
+    const toysCollections=client.db('intelliKids').collection('allToys')
 
 
+    app.post('/toys',async(req,res)=>{
+      const toysInfo=req.body 
+      console.log(toysInfo)
+    })
 
 
     
