@@ -8,9 +8,11 @@ const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app=express()
 const port=process.env.PORT||5000;
 
+
 // middleware
 app.use(cors())
 app.use(express.json())
+
 
 
 const uri = `mongodb+srv://${process.env.USER_NAME}:${process.env.USER_KEY}@cluster0.df7drrh.mongodb.net/?retryWrites=true&w=majority`;
@@ -72,8 +74,14 @@ async function run() {
  toysQuantity:toy.toysQuantity
         }
       }
-
       const result=await toysCollections.updateOne(filter,updateToy,options)
+      res.send(result)
+    })
+
+    app.delete('/toys/:id',async(req,res)=>{
+      const id=req.params.id 
+      const query={_id:new ObjectId(id)}
+      const result=await toysCollections.deleteOne(query)
       res.send(result)
     })
 
