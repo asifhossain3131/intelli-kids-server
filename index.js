@@ -1,5 +1,6 @@
 const express=require('express')
 const cors=require('cors')
+const jwt = require('jsonwebtoken');
 require('dotenv').config()
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
@@ -31,7 +32,14 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     // await client.connect();
     const toysCollections=client.db('intelliKids').collection('allToys')
+ 
 
+    // jwt 
+    app.post('/authoriztion',(req,res)=>{
+      const user=req.body 
+      const token=jwt.sign(user,process.env.ACCESS_TOKEN, { expiresIn: '2h' })
+      res.send({token})
+    })
 
     app.get('/toys', async(req,res)=>{
       const result=await toysCollections.find().toArray()
@@ -46,12 +54,20 @@ async function run() {
     })
 
     app.get('/mytoys/',async(req,res)=>{ 
-      const email=req.query.email 
+      const email=req.query.email
+      const sort=req.query.sort
+      console.log(sort)
       let query={}
       if(email){
         query={sellerEmail:email}
       }
-      const result=await toysCollections.find(query).toArray()
+      let result
+      if(sort==0){
+        result=await toysCollections.find(query).toArray()
+      }
+      else{
+         result=await toysCollections.find(query).sort({toysPrice:sort}).toArray()
+      }
       res.send(result)
     })
 
