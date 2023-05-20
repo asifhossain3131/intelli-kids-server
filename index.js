@@ -1,6 +1,5 @@
 const express=require('express')
 const cors=require('cors')
-const jwt = require('jsonwebtoken');
 require('dotenv').config()
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
@@ -27,21 +26,6 @@ const client = new MongoClient(uri, {
   }
 });
 
-const verifyToken=(req,res,next)=>{
- const authorization=req.headers.authorization
-  if(!authorization){
-return res.status(401).send({error:true, message:'unauthorized access'})
- }
- const token=authorization.split(' ')[1]
- jwt.verify(token,process.env.ACCESS_TOKEN,(err,decoded)=>{
-  if(err){
-return res.status(401).send({error:true, message:'unauthorized access'})
-  }
-  req.decoded=decoded
-  next()
- })
-}
-
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
@@ -50,15 +34,17 @@ async function run() {
     const bannerCollections=client.db('intelliKids').collection('bannerInfo')
  
 
-    // jwt 
-    app.post('/authoriztion',(req,res)=>{
-      const user=req.body 
-      const token=jwt.sign(user,process.env.ACCESS_TOKEN, { expiresIn: '2h' })
-      res.send({token})
-    })
 
     app.get('/toys', async(req,res)=>{
-      const result=await toysCollections.find().toArray()
+      let query={}
+      let result
+      if(req.query?.category){
+    query={subCategory: req.query.category}
+     result=await toysCollections.find(query).toArray()
+      }
+      else{
+         result=await toysCollections.find().toArray()
+      }
       res.send(result)
     })
 
@@ -69,12 +55,12 @@ async function run() {
       res.send(result)
     })
 
-    app.get('/mytoys/', verifyToken, async(req,res)=>{ 
-      const decoded=req.decoded
+// app.get('/toys/:category',async(req,res)=>{
+//   console.log(req.params.category)
+// })
+
+    app.get('/mytoys', async(req,res)=>{ 
       const email=req.query.email
-      if(decoded.email!==email){
-        return res.status(403).send({error:true, message:'Forbidden access'})
-      }
       const sort=req.query.sort
       let query={}
       if(email){
