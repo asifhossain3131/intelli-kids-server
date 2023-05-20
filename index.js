@@ -32,15 +32,19 @@ async function run() {
     // await client.connect();
     const toysCollections=client.db('intelliKids').collection('allToys')
     const bannerCollections=client.db('intelliKids').collection('bannerInfo')
+    const kidTestimonialCollections=client.db('intelliKids').collection('kidTestimonials')
  
 
-
+  //  toys related 
     app.get('/toys', async(req,res)=>{
       let query={}
+      const limit=parseInt(req.query.limit)||2
+      const page=parseInt(req.query.page)||0
+      const skip=page*limit
       let result
       if(req.query?.category){
     query={subCategory: req.query.category}
-     result=await toysCollections.find(query).toArray()
+     result=await toysCollections.find(query).skip(skip).limit(limit).toArray()
       }
       else{
          result=await toysCollections.find().toArray()
@@ -55,20 +59,17 @@ async function run() {
       res.send(result)
     })
 
-// app.get('/toys/:category',async(req,res)=>{
-//   console.log(req.params.category)
-// })
-
     app.get('/mytoys', async(req,res)=>{ 
       const email=req.query.email
       const sort=req.query.sort
+
       let query={}
       if(email){
         query={sellerEmail:email}
       }
       let result
       if(sort==0){
-        result=await toysCollections.find(query).toArray()
+        result=await toysCollections.find().toArray()
       }
       else{
          result=await toysCollections.find(query).sort({toysPrice:sort}).toArray()
@@ -107,11 +108,19 @@ async function run() {
     })
 
 
-    // banner info
+    // banner info related
     app.get('/bannerInfo',async(req,res)=>{
       const result=await bannerCollections.find().toArray()
       res.send(result)
     })
+
+
+    // kid testimonial related
+    app.get('/testimonials',async(req,res)=>{
+      const result=await kidTestimonialCollections.find().toArray()
+      res.send(result)
+    })
+
 
     
     // Send a ping to confirm a successful connection
