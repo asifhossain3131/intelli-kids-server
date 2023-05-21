@@ -54,6 +54,12 @@ async function run() {
       res.send(result)
     })
 
+    app.get('/toy/:category', async(req,res)=>{
+      const category=req.params.category 
+      const result=await toysCollections.find({subCategory: category}).toArray()
+      res.send(result)
+    })
+
     app.get('/toys/:id', async(req,res)=>{
       const id=req.params.id
       const query={_id: new ObjectId(id)}
