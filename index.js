@@ -30,9 +30,11 @@ async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
     // await client.connect();
+    // collections lists 
     const toysCollections=client.db('intelliKids').collection('allToys')
     const bannerCollections=client.db('intelliKids').collection('bannerInfo')
     const kidTestimonialCollections=client.db('intelliKids').collection('kidTestimonials')
+    const galleryCollections=client.db('intelliKids').collection('gallery')
  
 
   //  toys related 
@@ -47,7 +49,7 @@ async function run() {
      result=await toysCollections.find(query).skip(skip).limit(limit).toArray()
       }
       else{
-         result=await toysCollections.find().toArray()
+         result=await toysCollections.find().limit(20).toArray()
       }
       res.send(result)
     })
@@ -62,19 +64,25 @@ async function run() {
     app.get('/mytoys', async(req,res)=>{ 
       const email=req.query.email
       const sort=req.query.sort
-
       let query={}
       if(email){
         query={sellerEmail:email}
       }
       let result
       if(sort==0){
-        result=await toysCollections.find().toArray()
+        result=await toysCollections.find(query).toArray()
       }
       else{
          result=await toysCollections.find(query).sort({toysPrice:sort}).toArray()
       }
       res.send(result)
+    })
+
+    app.get('/countToys/:category',async(req,res)=>{
+               const category=req.params.category 
+               const filter={subCategory: category}
+               const toysNumbers=await toysCollections.countDocuments(filter)
+               res.send({toysNumbers:toysNumbers})
     })
 
     app.post('/toys',async(req,res)=>{
@@ -118,6 +126,12 @@ async function run() {
     // kid testimonial related
     app.get('/testimonials',async(req,res)=>{
       const result=await kidTestimonialCollections.find().toArray()
+      res.send(result)
+    })
+
+    // gallery related 
+    app.get('/galleries', async(req,res)=>{
+      const result=await galleryCollections.find().toArray()
       res.send(result)
     })
 
